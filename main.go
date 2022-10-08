@@ -27,7 +27,7 @@ func initModel() model {
 	ti.Width = 20
   
   return model {
-    choices: retrieve(),//[]string{"Find billy", "Laugh hysterically"},
+    choices: retrieve(),
     pointer: 0,
     inputMode: false,
     textInput: ti,
@@ -37,7 +37,7 @@ func initModel() model {
 func remove(i int, s []string) []string {
   if len(s) != 0 {
   copy(s[i:], s[i+1:])
-  s[len(s)-1] = "" // remove element
+  s[len(s)-1] = ""
   s = s[:len(s)-1]
   }
   return s
@@ -63,16 +63,23 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd){
 
         case "enter":
           switch m.inputMode {
+            case true:
+              if len(m.textInput.Value()) > 0 {
+              m.choices = append(m.choices, m.textInput.Value())
+              m.textInput.SetValue("")
+            }
+            m.inputMode = false
+          }
+
+        case "d":
+          switch m.inputMode {
             case false:
               m.choices = remove(m.pointer, m.choices)
               if m.pointer != 0 {
                 m.pointer -= 1
               }
-            case true:
-              m.choices = append(m.choices, m.textInput.Value())
-              m.textInput.SetValue("")
-              m.inputMode = false
           }
+          fallthrough
 
         case "n":
          switch m.inputMode {
@@ -81,7 +88,6 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd){
               return m, nil
           }
           fallthrough
-          //return m, cmd
 
         case "q":
           if m.inputMode == false {
@@ -117,7 +123,7 @@ func (m model) View() string {
 
   switch m.inputMode {
     case false:
-      start := "Press 'n' for new entry!\n"
+      start := "Options: (n)ew - (d)elete - (s)ave - (q)uit\n"
       for i, choice := range m.choices {
         p := "  "
         if i == m.pointer {
@@ -176,7 +182,7 @@ func retrieve() []string {
 
 func clear() {
   tm.Clear()
- tm.MoveCursor(1, 1)
+  tm.MoveCursor(1, 1)
 }
 
 
